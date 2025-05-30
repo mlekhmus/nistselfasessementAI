@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NIST CSF 2.0 Manufacturing Compliance Tracker - Fixed</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
+            color: white;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .dashboard-card h3 {
+            font-size: 0.875rem;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .dashboard-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e3a8a;
+        }
+
+        .dashboard-card .subtitle {
+            font-size: 0.875rem;
+            color: #888;
+            margin-top: 0.25rem;
+        }
+
+        .controls-header {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            align-items: center;
+        }
+
+        .search-container {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #1e3a8a;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+        }
+
+        .filter-btn:hover {
+            border-color: #1e3a8a;
+            background: #f8f9ff;
+        }
+
+        .filter-btn.active {
+            background: #1e3a8a;
+            color: white;
+            border-color: #1e3a8a;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .export-btn {
+            padding: 0.5rem 1rem;
+            background: #059669;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 0.875rem;
+        }
+
+        .export-btn:hover {
+            background: #047857;
+        }
+
+        .clear-btn {
+            background: #dc2626;
+        }
+
+        .clear-btn:hover {
+            background: #b91c1c;
+        }
+
+        .controls-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .control-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.2s;
+        }
+
+        .control-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .control-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .control-id-badge {
+            background: #1e3a8a;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .control-info {
+            flex: 1;
+        }
+
+        .control-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #1a1a1a;
+        }
+
+        .control-description {
+            color: #666;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        .control-scores {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .score-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .score-label {
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .score-select {
+            padding: 0.5rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .score-select:focus {
+            outline: none;
+            border-color: #1e3a8a;
+        }
+
+        .gap-indicator {
+            padding: 0.5rem;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .gap-critical {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .gap-exists {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .gap-good {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .gap-exceeding {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .notes-section {
+            margin-top: 1rem;
+        }
+
+        .notes-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .notes-label {
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .ai-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: transform 0.2s;
+            font-weight: 500;
+        }
+
+        .ai-button:hover {
+            transform: scale(1.05);
+        }
+
+        .ai-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .notes-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+            transition: border-color 0.2s;
+        }
+
+        .notes-textarea:focus {
+            outline: none;
+            border-color: #1e3a8a;
+        }
+
+        .chat-container {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 10px 0;
+            display: none;
+        }
+
+        .chat-messages {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+
+        .chat-message {
+            margin: 10px 0;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+
+        .ai-message {
+            background: #eff6ff;
+            border-left: 3px solid #3b82f6;
+        }
+
+        .user-message {
+            background: #f0fdf4;
+            border-left: 3px solid #22c55e;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .user-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+        }
+
+        .send-button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .send-button:hover {
+            background: #2563eb;
+        }
+
+        .send-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .api-info {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 6px;
+            padding: 12px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+
+        .file-upload-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .file-input {
+            padding: 0.5rem 1rem;
+            margin: 0.5rem;
+        }
+
+        .maturity-toggle-btn {
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .maturity-toggle-btn:hover {
+            background: #e5e7eb;
+            border-color: #9ca3af;
+        }
+
+        .maturity-levels {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .maturity-levels.show {
+            display: block;
+        }
+
+        .maturity-level {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .maturity-level:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .maturity-level-header {
+            font-weight: 600;
+            color: #1e3a8a;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .maturity-level-text {
+            color: #4b5563;
+            font-size: 0.813rem;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .controls-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-buttons {
+                justify-content: center;
+            }
+
+            .export-buttons {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>NIST CSF 2.0 Manufacturing Compliance Tracker</h1>
+        <p>Comprehensive assessment tool with AI-powered assessments and dynamic CSV support</p>
+    </header>
+
+    <div class="container">
+        <div class="api-info" id="apiInfo">
+            <strong>🤖 Enhanced AI Assessment Features:</strong> 
+            <br><small>Our AI assessor now provides control-specific guidance using your maturity level definitions! Each assessment is tailored to the specific control and uses the maturity guidance to ask targeted questions and provide precise recommendations.</small>
+            <br><br>
+            <div style="background: #f0f9ff; padding: 8px; border-radius: 4px; margin: 8px 0; border-left: 3px solid #3b82f6;">
+                <strong>✨ New AI Capabilities:</strong>
+                <br>• <strong>Control-Specific Introduction:</strong> AI references the exact control being assessed
+                <br>• <strong>Maturity-Guided Questions:</strong> Uses your Level 1-4/5 guidance to ask targeted questions  
+                <br>• <strong>Intelligent Assessment:</strong> Maps responses to specific maturity levels
+                <br>• <strong>Actionable Recommendations:</strong> Suggests specific steps to reach the next maturity level
+            </div>
+            <button class="ai-button" id="test-api-btn" style="margin-top: 10px;">🔍 Test API Connection</button>
+            <button class="ai-button" id="reset-api-btn" style="margin-top: 10px; margin-left: 10px;">🔄 Reset API Key</button>
+        </div>
+
+        <div class="file-upload-section" id="uploadSection">
+            <h3>📊 Load NIST Controls from CSV</h3>
+            <p>Upload your NIST CSF 2.0 Manufacturing CSV file to load all controls</p>
+            <div style="margin: 1rem 0; padding: 1rem; background: #f0f9ff; border-radius: 8px; border: 1px solid #0ea5e9;">
+                <strong>📋 Expected CSV Format:</strong>
+                <br><small>Columns: Control_ID, Control_Title, Control_Description, Category, Subcategory, Level_1_Maturity, Level_2_Maturity, Level_3_Maturity, Level_4_Maturity, [Level_5_Maturity]</small>
+            </div>
+            <input type="file" id="csvFileInput" accept=".csv,.txt" class="file-input">
+            <button class="export-btn" onclick="loadCSVFile()">📁 Load CSV File</button>
+        </div>
+
+        <div class="dashboard" id="dashboard">
+            <div class="dashboard-card">
+                <h3>Current Score</h3>
+                <div class="value" id="currentScoreValue">0.0</div>
+                <div class="subtitle">Average maturity level</div>
+            </div>
+            <div class="dashboard-card">
+                <h3>Target Score</h3>
+                <div class="value" id="targetScoreValue">0.0</div>
+                <div class="subtitle">Desired maturity level</div>
+            </div>
+            <div class="dashboard-card">
+                <h3>Gap Analysis</h3>
+                <div class="value" id="gapValue">0.0</div>
+                <div class="subtitle">Average gap to target</div>
+            </div>
+            <div class="dashboard-card">
+                <h3>Completion</h3>
+                <div class="value" id="completionValue">0%</div>
+                <div class="subtitle">Controls assessed</div>
+            </div>
+        </div>
+
+        <div class="controls-header">
+            <div class="search-container">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search controls by ID, title, or description...">
+            </div>
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="Govern">Govern</button>
+                <button class="filter-btn" data-filter="Identify">Identify</button>
+                <button class="filter-btn" data-filter="Protect">Protect</button>
+                <button class="filter-btn" data-filter="Detect">Detect</button>
+                <button class="filter-btn" data-filter="Respond">Respond</button>
+                <button class="filter-btn" data-filter="Recover">Recover</button>
+            </div>
+            <div class="export-buttons">
+                <button class="export-btn" onclick="exportToJSON()">📄 Export JSON</button>
+                <button class="export-btn" onclick="exportToCSV()">📊 Export Complete CSV</button>
+                <button class="export-btn clear-btn" onclick="clearAllData()">🗑️ Clear Assessment Data</button>
+                <button class="export-btn clear-btn" onclick="resetDatabase()">🔄 Reset Database</button>
+            </div>
+        </div>
+        
+        <div style="background: #f0fdf4; border: 1px solid #22c55e; border-radius: 8px; padding: 12px; margin-bottom: 1rem; font-size: 14px;">
+            <strong>💾 Complete Export/Import Cycle:</strong> 
+            <br><small>The "Export Complete CSV" includes all control definitions AND your assessment data (scores, notes). You can re-import this CSV later to restore everything exactly as it was!</small>
+        </div>
+
+        <div class="controls-grid" id="controlsGrid">
+            <div class="loading">Please upload the NIST CSF CSV file to load controls...</div>
+        </div>
+    </div>
+
+    <script>
+        console.log('🚀 NIST CSF Tracker Initialized');
+        
+        let nistControls = {};
+        let assessmentData = {};
+        let CLAUDE_API_KEY = '';
+        let currentConversations = {};
+        
+        const CLAUDE_API_URL = 'http://localhost:8001/claude';
+
+        // Proper CSV parser that handles quoted fields
+        function parseCSV(csvText) {
+            const result = [];
+            const lines = csvText.split('\n');
+            
+            for (let line of lines) {
+                if (!line.trim()) continue;
+                
+                const row = [];
+                let current = '';
+                let inQuotes = false;
+                let i = 0;
+                
+                while (i < line.length) {
+                    const char = line[i];
+                    
+                    if (char === '"') {
+                        if (inQuotes && line[i + 1] === '"') {
+                            current += '"';
+                            i += 2;
+                        } else {
+                            inQuotes = !inQuotes;
+                            i++;
+                        }
+                    } else if (char === ',' && !inQuotes) {
+                        row.push(current.trim());
+                        current = '';
+                        i++;
+                    } else {
+                        current += char;
+                        i++;
+                    }
+                }
+                
+                row.push(current.trim());
+                result.push(row);
+            }
+            
+            return result;
+        }
+
+        function loadCSVFile() {
+            const fileInput = document.getElementById('csvFileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select a CSV file');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    console.log('Loading CSV file...');
+                    const csvData = parseCSV(e.target.result);
+                    console.log('Parsed rows:', csvData.length);
+                    
+                    if (csvData.length < 2) {
+                        throw new Error('CSV file appears to be empty or invalid');
+                    }
+                    
+                    const headers = csvData[0];
+                    console.log('Headers:', headers);
+                    
+                    // Find column indices dynamically
+                    const colIndices = {
+                        controlId: headers.findIndex(h => h.toLowerCase().includes('control_id') || h.toLowerCase().includes('id')),
+                        title: headers.findIndex(h => h.toLowerCase().includes('title')),
+                        description: headers.findIndex(h => h.toLowerCase().includes('description')),
+                        category: headers.findIndex(h => h.toLowerCase().includes('category') && !h.toLowerCase().includes('sub')),
+                        subcategory: headers.findIndex(h => h.toLowerCase().includes('subcategory')),
+                        level1: headers.findIndex(h => h.toLowerCase().includes('level_1') || h.toLowerCase().includes('level 1')),
+                        level2: headers.findIndex(h => h.toLowerCase().includes('level_2') || h.toLowerCase().includes('level 2')),
+                        level3: headers.findIndex(h => h.toLowerCase().includes('level_3') || h.toLowerCase().includes('level 3')),
+                        level4: headers.findIndex(h => h.toLowerCase().includes('level_4') || h.toLowerCase().includes('level 4')),
+                        level5: headers.findIndex(h => h.toLowerCase().includes('level_5') || h.toLowerCase().includes('level 5')),
+                        // Assessment data columns (for re-importing exported CSVs)
+                        currentScore: headers.findIndex(h => h.toLowerCase().includes('current_score') || h.toLowerCase().includes('current score')),
+                        targetScore: headers.findIndex(h => h.toLowerCase().includes('target_score') || h.toLowerCase().includes('target score')),
+                        notes: headers.findIndex(h => h.toLowerCase().includes('assessment_notes') || h.toLowerCase().includes('notes'))
+                    };
+                    
+                    console.log('Column indices:', colIndices);
+                    
+                    nistControls = {};
+                    const importedAssessments = {}; // Store assessment data from CSV
+                    
+                    for (let i = 1; i < csvData.length; i++) {
+                        const row = csvData[i];
+                        if (row.length < 5) continue; // Skip incomplete rows
+                        
+                        const controlId = row[colIndices.controlId];
+                        if (!controlId) continue;
+                        
+                        nistControls[controlId] = {
+                            title: row[colIndices.title] || '',
+                            description: row[colIndices.description] || '',
+                            category: row[colIndices.category] || '',
+                            subcategory: row[colIndices.subcategory] || '',
+                            maturityLevels: {
+                                1: row[colIndices.level1] || '',
+                                2: row[colIndices.level2] || '',
+                                3: row[colIndices.level3] || '',
+                                4: row[colIndices.level4] || ''
+                            }
+                        };
+                        
+                        // Add level 5 if it exists
+                        if (colIndices.level5 >= 0 && row[colIndices.level5]) {
+                            nistControls[controlId].maturityLevels[5] = row[colIndices.level5];
+                        }
+                        
+                        // Import assessment data if present
+                        if (colIndices.currentScore >= 0 || colIndices.targetScore >= 0 || colIndices.notes >= 0) {
+                            importedAssessments[controlId] = {};
+                            
+                            if (colIndices.currentScore >= 0 && row[colIndices.currentScore]) {
+                                const currentScore = parseInt(row[colIndices.currentScore]);
+                                if (!isNaN(currentScore)) {
+                                    importedAssessments[controlId].currentScore = currentScore;
+                                }
+                            }
+                            
+                            if (colIndices.targetScore >= 0 && row[colIndices.targetScore]) {
+                                const targetScore = parseInt(row[colIndices.targetScore]);
+                                if (!isNaN(targetScore)) {
+                                    importedAssessments[controlId].targetScore = targetScore;
+                                }
+                            }
+                            
+                            if (colIndices.notes >= 0 && row[colIndices.notes]) {
+                                importedAssessments[controlId].notes = row[colIndices.notes];
+                            }
+                        }
+                    }
+                    
+                    console.log('Loaded controls:', Object.keys(nistControls).length);
+                    console.log('Loaded assessments:', Object.keys(importedAssessments).length);
+                    
+                    // Merge imported assessments with existing ones
+                    if (Object.keys(importedAssessments).length > 0) {
+                        Object.assign(assessmentData, importedAssessments);
+                        localStorage.setItem('nistAssessmentData', JSON.stringify(assessmentData));
+                        console.log('✅ Assessment data imported from CSV');
+                    }
+                    
+                    localStorage.setItem('nistControlsData', JSON.stringify(nistControls));
+                    document.getElementById('uploadSection').style.display = 'none';
+                    renderControls();
+                    updateDashboard();
+                    
+                    // Show success message
+                    const controlCount = Object.keys(nistControls).length;
+                    const assessmentCount = Object.keys(importedAssessments).length;
+                    let message = `✅ Successfully loaded ${controlCount} controls`;
+                    if (assessmentCount > 0) {
+                        message += ` and ${assessmentCount} assessments`;
+                    }
+                    alert(message);
+                    
+                } catch (error) {
+                    console.error('Error parsing CSV:', error);
+                    alert('Error parsing CSV file: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function checkApiKey() {
+            if (!CLAUDE_API_KEY) {
+                CLAUDE_API_KEY = prompt('Please enter your Claude API key:\n\nGet one at: https://console.anthropic.com/');
+                if (!CLAUDE_API_KEY) {
+                    alert('API key required to use AI assessment');
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        async function callClaudeAPI(messages, systemPrompt) {
+            try {
+                console.log('Calling Claude API...');
+                const requestBody = {
+                    model: 'claude-3-5-sonnet-20241022',
+                    max_tokens: 1000,
+                    system: systemPrompt,
+                    messages: messages
+                };
+                
+                const response = await fetch(CLAUDE_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': CLAUDE_API_KEY,
+                        'anthropic-version': '2023-06-01'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`API Error ${response.status}: ${errorText}`);
+                }
+
+                const data = await response.json();
+                return data.content[0].text;
+                
+            } catch (error) {
+                console.error('API Error:', error);
+                throw error;
+            }
+        }
+
+        async function testApiConnection() {
+            if (!checkApiKey()) return;
+            
+            const testBtn = document.getElementById('test-api-btn');
+            const originalText = testBtn.innerHTML;
+            testBtn.innerHTML = '🔄 Testing...';
+            testBtn.disabled = true;
+            
+            try {
+                await callClaudeAPI([
+                    { role: "user", content: "Please respond with just 'API connection successful!'" }
+                ], "You are a helpful assistant.");
+                
+                alert('✅ API Connection Successful!');
+                testBtn.innerHTML = '✅ Working!';
+            } catch (error) {
+                alert(`❌ Connection Failed:\n\n${error.message}`);
+                testBtn.innerHTML = originalText;
+            } finally {
+                testBtn.disabled = false;
+                setTimeout(() => {
+                    testBtn.innerHTML = originalText;
+                }, 3000);
+            }
+        }
+
+        function resetApiKey() {
+            CLAUDE_API_KEY = '';
+            alert('API key cleared.');
+        }
+
+        async function startAIAssessment(controlId, controlTitle) {
+            console.log('Starting AI assessment for:', controlId);
+            
+            const safeControlId = controlId.replace(/\./g, '-');
+            const chatContainer = document.getElementById(`chat-${safeControlId}`);
+            const button = document.getElementById(`ai-btn-${safeControlId}`);
+            const messagesContainer = document.getElementById(`chat-messages-${safeControlId}`);
+            
+            if (!chatContainer || !button || !messagesContainer) {
+                console.error('Chat elements not found for control:', controlId);
+                return;
+            }
+            
+            chatContainer.style.display = 'block';
+            button.disabled = true;
+            button.innerHTML = '🤖 Assessment Active';
+            messagesContainer.innerHTML = '';
+            
+            // Initialize conversation
+            currentConversations[controlId] = {
+                step: 0,
+                responses: [],
+                controlData: nistControls[controlId] || {},
+                conversationHistory: []
+            };
+            
+            if (!checkApiKey()) {
+                addMessage(controlId, `No API key provided. Would you like to try Demo Mode?<br><br><button onclick="provideDemoAssessment('${controlId}', '${controlTitle}')" class="ai-button" style="margin-top: 10px;">🎮 Try Demo Mode</button>`, 'ai');
+                button.disabled = false;
+                button.innerHTML = '🤖 AI Assessment';
+                return;
+            }
+            
+            const control = nistControls[controlId];
+            
+            // Build maturity context
+            let maturityContext = "\n\nMATURITY LEVEL GUIDANCE:\n";
+            Object.keys(control.maturityLevels).forEach(level => {
+                if (control.maturityLevels[level]) {
+                    const levelName = getMaturityLabel(level);
+                    maturityContext += `\nLevel ${level} (${levelName}): ${control.maturityLevels[level]}`;
+                }
+            });
+            
+            const systemPrompt = `You are an expert cybersecurity assessor conducting a NIST CSF 2.0 assessment.
+
+CONTROL BEING ASSESSED:
+${controlId} - ${controlTitle}
+
+DESCRIPTION: ${control.description || 'No description available'}
+${maturityContext}
+
+ASSESSMENT INSTRUCTIONS:
+- Start by greeting and introducing the specific control you're assessing
+- Ask targeted questions to understand their current implementation level
+- Use the maturity level guidance above to frame your questions and assess responses
+- Guide them through understanding where they currently are (1-${Object.keys(control.maturityLevels).length}) and where they want to be
+- Provide specific, actionable recommendations based on the maturity levels
+- Keep responses concise but thorough
+- Reference specific maturity level characteristics in your assessment`;
+
+            try {
+                const response = await callClaudeAPI([
+                    { role: "user", content: `Begin the assessment for control ${controlId} - ${controlTitle}. Introduce yourself and the control, then ask your first targeted question about our current implementation.` }
+                ], systemPrompt);
+                
+                addMessage(controlId, response, 'ai');
+                
+            } catch (error) {
+                addMessage(controlId, `Error: ${error.message}<br><br><button onclick="provideDemoAssessment('${controlId}', '${controlTitle}')" class="ai-button" style="margin-top: 10px;">🎮 Try Demo Mode</button>`, 'ai');
+                
+                button.disabled = false;
+                button.innerHTML = '🤖 AI Assessment';
+            }
+        }
+
+        async function sendUserMessage(controlId) {
+            const safeControlId = controlId.replace(/\./g, '-');
+            const inputElement = document.getElementById(`user-input-${safeControlId}`);
+            const sendButton = document.getElementById(`send-btn-${safeControlId}`);
+            
+            if (!inputElement || !sendButton) return;
+            
+            const userMessage = inputElement.value.trim();
+            if (!userMessage) return;
+            
+            addMessage(controlId, userMessage, 'user');
+            inputElement.value = '';
+            sendButton.disabled = true;
+            sendButton.innerHTML = '⏳';
+            
+            // Add to conversation history
+            if (!currentConversations[controlId]) {
+                currentConversations[controlId] = { conversationHistory: [], step: 0, maxQuestions: 2 };
+            }
+            
+            currentConversations[controlId].conversationHistory.push({
+                role: "user",
+                content: userMessage
+            });
+            
+            // Increment step counter
+            currentConversations[controlId].step++;
+            
+            const control = nistControls[controlId];
+            const maxLevel = Object.keys(control.maturityLevels).length;
+            
+            // Check if we should provide final assessment
+            if (currentConversations[controlId].step >= currentConversations[controlId].maxQuestions) {
+                // Build maturity context for final assessment
+                let maturityContext = "\n\nMATURITY LEVEL GUIDANCE:\n";
+                Object.keys(control.maturityLevels).forEach(level => {
+                    if (control.maturityLevels[level]) {
+                        const levelName = getMaturityLabel(level);
+                        maturityContext += `\nLevel ${level} (${levelName}): ${control.maturityLevels[level]}`;
+                    }
+                });
+                
+                const finalSystemPrompt = `You are providing a final assessment for NIST CSF 2.0 control ${controlId} - ${control.title}.
+
+${maturityContext}
+
+FINAL ASSESSMENT INSTRUCTIONS:
+- Based on the conversation, determine their current maturity level (1-${maxLevel})
+- Provide a VERY CONCISE assessment in this exact format:
+
+"**Current Rating: Level X - [Level Name]**
+
+You are rated Level X because: [1-2 sentence explanation]
+
+**To reach Level [X+1]:** [1-2 sentence recommendation]"
+
+- Keep the entire response under 4 sentences total
+- Be specific about what they need to do next
+- Reference the maturity level characteristics directly`;
+
+                try {
+                    const response = await callClaudeAPI(
+                        currentConversations[controlId].conversationHistory,
+                        finalSystemPrompt
+                    );
+                    
+                    addMessage(controlId, response, 'ai');
+                    
+                    // Add buttons for adding to notes and customizing
+                    setTimeout(() => {
+                        addMessage(controlId, `
+                            <div style="margin-top: 15px; padding: 10px; background: #f0f9ff; border-radius: 6px; border: 1px solid #3b82f6;">
+                                <strong>Assessment Complete!</strong><br>
+                                <button onclick="addAssessmentToNotes('${controlId}', \`${response.replace(/`/g, '\\`').replace(/'/g, "\\'")}\`)" class="ai-button" style="margin: 5px;">📝 Add to Notes</button>
+                                <button onclick="customizeAssessment('${controlId}', \`${response.replace(/`/g, '\\`').replace(/'/g, "\\'")}\`)" class="ai-button" style="margin: 5px;">✏️ Customize Plan</button>
+                                <button onclick="startNewAssessment('${controlId}', '${control.title}')" class="ai-button" style="margin: 5px;">🔄 New Assessment</button>
+                            </div>
+                        `, 'ai');
+                    }, 500);
+                    
+                } catch (error) {
+                    addMessage(controlId, `Error: ${error.message}`, 'ai');
+                } finally {
+                    sendButton.disabled = false;
+                    sendButton.innerHTML = '📤 Send';
+                }
+                
+            } else {
+                // Continue with follow-up question
+                let maturityContext = "\n\nMATURITY LEVEL GUIDANCE:\n";
+                Object.keys(control.maturityLevels).forEach(level => {
+                    if (control.maturityLevels[level]) {
+                        const levelName = getMaturityLabel(level);
+                        maturityContext += `\nLevel ${level} (${levelName}): ${control.maturityLevels[level]}`;
+                    }
+                });
+                
+                const systemPrompt = `You are conducting a quick NIST CSF 2.0 assessment for ${controlId} - ${control.title}.
+
+${maturityContext}
+
+INSTRUCTIONS:
+- You have asked ${currentConversations[controlId].step} of ${currentConversations[controlId].maxQuestions} questions
+- Ask ONE MORE targeted question to help determine their maturity level (1-${maxLevel})
+- Keep the question short and specific
+- Focus on key differentiators between maturity levels
+- After the next response, you'll provide the final assessment`;
+
+                try {
+                    const response = await callClaudeAPI(
+                        currentConversations[controlId].conversationHistory,
+                        systemPrompt
+                    );
+                    
+                    addMessage(controlId, response, 'ai');
+                    
+                    currentConversations[controlId].conversationHistory.push({
+                        role: "assistant",
+                        content: response
+                    });
+                    
+                } catch (error) {
+                    addMessage(controlId, `Error: ${error.message}`, 'ai');
+                } finally {
+                    sendButton.disabled = false;
+                    sendButton.innerHTML = '📤 Send';
+                }
+            }
+        }
+
+        function addMessage(controlId, message, type) {
+            const safeControlId = controlId.replace(/\./g, '-');
+            const messagesContainer = document.getElementById(`chat-messages-${safeControlId}`);
+            if (!messagesContainer) return;
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${type}-message`;
+            messageDiv.innerHTML = message;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function provideDemoAssessment(controlId, controlTitle) {
+            console.log('Providing demo assessment for:', controlId);
+            
+            const control = nistControls[controlId];
+            const maxLevel = control.maturityLevels[5] ? 5 : 4;
+            const assessedLevel = Math.min(3, maxLevel); // Demo shows level 3 or max if lower
+            
+            const demoAssessment = `**AI Assessment for ${controlId} - ${controlTitle}**
+
+*Based on our conversation about your ${controlTitle} implementation...*
+
+**Current Maturity Level: ${assessedLevel}/${maxLevel} - ${getMaturityLabel(assessedLevel)}**
+
+**Assessment Summary:**
+Your organization demonstrates characteristics consistent with Level ${assessedLevel} maturity for this control:
+
+${control.maturityLevels[assessedLevel] || 'Documented processes with regular review procedures in place.'}
+
+**Key Strengths Identified:**
+• Documented procedures and policies exist for ${controlTitle}
+• Regular review processes are established  
+• Some level of automation or tooling implemented
+• Staff awareness of requirements
+
+**Gaps to Address (to reach Level ${Math.min(assessedLevel + 1, maxLevel)}):**
+${control.maturityLevels[assessedLevel + 1] ? 
+`To achieve Level ${assessedLevel + 1} (${getMaturityLabel(assessedLevel + 1)}), focus on:
+${control.maturityLevels[assessedLevel + 1]}` : 
+'You are at the highest maturity level - focus on continuous improvement and optimization.'}
+
+**Specific Recommendations for ${controlTitle}:**
+• Enhance monitoring and alerting capabilities for this control area
+• Establish metrics and KPIs to measure control effectiveness
+• Implement automated reporting and compliance tracking
+• Conduct regular training specific to ${controlTitle} requirements
+• Document lessons learned and improvement opportunities
+
+**Evidence to Collect:**
+• Current policy and procedure documentation for ${controlTitle}
+• System configuration screenshots showing implementation
+• Training records and completion certificates
+• Incident logs and response documentation
+• Metrics and reporting outputs
+
+**Next Steps:**
+1. Review the Level ${Math.min(assessedLevel + 1, maxLevel)} maturity characteristics above
+2. Conduct a gap analysis against your current implementation
+3. Develop an improvement roadmap with specific milestones
+4. Assign ownership and timelines for enhancement activities
+
+---
+*Demo Assessment generated on ${new Date().toLocaleDateString()} for control ${controlId}*
+*This assessment is based on typical implementations - customize based on your specific environment*`;
+
+            const safeControlId = controlId.replace(/\./g, '-');
+            const notesBox = document.getElementById(`notes-${safeControlId}`);
+            if (notesBox) {
+                notesBox.value = demoAssessment;
+                updateNotes(controlId, demoAssessment);
+            }
+            
+            const chatContainer = document.getElementById(`chat-${safeControlId}`);
+            const button = document.getElementById(`ai-btn-${safeControlId}`);
+            
+            if (chatContainer) chatContainer.style.display = 'none';
+            if (button) {
+                button.disabled = false;
+                button.innerHTML = '🤖 AI Assessment';
+            }
+            
+            alert(`✅ Demo assessment completed for ${controlId}!\n\nThe assessment has been added to the notes box and includes specific maturity guidance for this control.`);
+        }
+
+        function loadAssessmentData() {
+            const saved = localStorage.getItem('nistAssessmentData');
+            assessmentData = saved ? JSON.parse(saved) : {};
+        }
+
+        function saveAssessmentData() {
+            localStorage.setItem('nistAssessmentData', JSON.stringify(assessmentData));
+            updateDashboard();
+        }
+
+        function renderControls(filter = 'all', searchTerm = '') {
+            const container = document.getElementById('controlsGrid');
+            container.innerHTML = '';
+
+            if (Object.keys(nistControls).length === 0) {
+                container.innerHTML = '<div class="loading">Please upload the NIST CSF CSV file to load controls...</div>';
+                return;
+            }
+
+            Object.entries(nistControls).forEach(([controlId, control]) => {
+                if (filter !== 'all' && control.category !== filter) return;
+                if (searchTerm && !matchesSearch(controlId, control, searchTerm)) return;
+
+                const controlCard = createControlCard(controlId, control);
+                container.appendChild(controlCard);
+            });
+            
+            setupAIListeners();
+        }
+
+        function matchesSearch(controlId, control, searchTerm) {
+            const term = searchTerm.toLowerCase();
+            return controlId.toLowerCase().includes(term) ||
+                   control.title.toLowerCase().includes(term) ||
+                   control.description.toLowerCase().includes(term);
+        }
+
+        function createControlCard(controlId, control) {
+            const assessment = assessmentData[controlId] || {};
+            const currentScore = assessment.currentScore || 0;
+            const targetScore = assessment.targetScore || 0;
+            const gap = targetScore - currentScore;
+            const notes = assessment.notes || '';
+            const safeControlId = controlId.replace(/\./g, '-');
+
+            // Determine max maturity level (4 or 5)
+            const maxLevel = control.maturityLevels[5] ? 5 : 4;
+
+            const card = document.createElement('div');
+            card.className = 'control-card';
+            card.innerHTML = `
+                <div class="control-header">
+                    <span class="control-id-badge">${controlId}</span>
+                    <div class="control-info">
+                        <h3 class="control-title">${control.title}</h3>
+                        <p class="control-description">${control.description}</p>
+                    </div>
+                </div>
+                <div class="control-scores">
+                    <div class="score-group">
+                        <label class="score-label">Current Score</label>
+                        <select class="score-select" onchange="updateScore('${controlId}', 'current', this.value)">
+                            ${generateScoreOptions(currentScore, maxLevel)}
+                        </select>
+                    </div>
+                    <div class="score-group">
+                        <label class="score-label">Target Score</label>
+                        <select class="score-select" onchange="updateScore('${controlId}', 'target', this.value)">
+                            ${generateScoreOptions(targetScore, maxLevel)}
+                        </select>
+                    </div>
+                    <div class="score-group">
+                        <label class="score-label">Gap</label>
+                        <div class="gap-indicator ${getGapClass(gap)}">${getGapText(gap)}</div>
+                    </div>
+                </div>
+                <div class="notes-section">
+                    <div class="notes-header">
+                        <label class="notes-label">Assessment Notes</label>
+                        <button class="ai-button" data-control-id="${controlId}" data-control-title="${control.title}" id="ai-btn-${safeControlId}">
+                            🤖 AI Assessment
+                        </button>
+                    </div>
+                    <textarea class="notes-textarea" id="notes-${safeControlId}" onchange="updateNotes('${controlId}', this.value)">${notes}</textarea>
+                    
+                    <div class="chat-container" id="chat-${safeControlId}">
+                        <div class="chat-messages" id="chat-messages-${safeControlId}"></div>
+                        <div class="input-container">
+                            <input type="text" class="user-input" id="user-input-${safeControlId}" placeholder="Type your response..." onkeypress="if(event.key==='Enter') sendUserMessage('${controlId}')">
+                            <button class="send-button" id="send-btn-${safeControlId}" onclick="sendUserMessage('${controlId}')">📤 Send</button>
+                        </div>
+                    </div>
+                </div>
+                <button class="maturity-toggle-btn" onclick="toggleMaturity('${controlId}')">Show Maturity Levels</button>
+                <div class="maturity-levels" id="maturity-${safeControlId}">
+                    ${generateMaturityLevels(control.maturityLevels)}
+                </div>
+            `;
+            return card;
+        }
+
+        function generateScoreOptions(selectedValue, maxLevel = 4) {
+            let options = '<option value="0">Not Assessed</option>';
+            for (let i = 1; i <= maxLevel; i++) {
+                const selected = selectedValue == i ? 'selected' : '';
+                options += `<option value="${i}" ${selected}>${i} - ${getMaturityLabel(i)}</option>`;
+            }
+            return options;
+        }
+
+        function getMaturityLabel(score) {
+            const labels = {1: 'Initial', 2: 'Developing', 3: 'Defined', 4: 'Managed', 5: 'Optimized'};
+            return labels[score] || 'Not Assessed';
+        }
+
+        function getGapClass(gap) {
+            if (gap >= 3) return 'gap-critical';
+            if (gap >= 1) return 'gap-exists';
+            if (gap === 0) return 'gap-good';
+            return 'gap-exceeding';
+        }
+
+        function getGapText(gap) {
+            if (gap >= 3) return `Gap: ${gap} (Critical)`;
+            if (gap >= 1) return `Gap: ${gap} (Exists)`;
+            if (gap === 0) return 'On Target';
+            return `Exceeding by ${Math.abs(gap)}`;
+        }
+
+        function generateMaturityLevels(levels) {
+            let html = '';
+            for (let i = 1; i <= Object.keys(levels).length; i++) {
+                if (levels[i]) {
+                    html += `
+                        <div class="maturity-level">
+                            <div class="maturity-level-header">Level ${i} - ${getMaturityLabel(i)}</div>
+                            <div class="maturity-level-text">${levels[i]}</div>
+                        </div>
+                    `;
+                }
+            }
+            return html;
+        }
+
+        window.updateScore = function(controlId, type, value) {
+            if (!assessmentData[controlId]) assessmentData[controlId] = {};
+            assessmentData[controlId][type + 'Score'] = parseInt(value);
+            saveAssessmentData();
+            
+            const card = document.querySelector(`[onchange*="${controlId}"]`).closest('.control-card');
+            const currentScore = assessmentData[controlId].currentScore || 0;
+            const targetScore = assessmentData[controlId].targetScore || 0;
+            const gap = targetScore - currentScore;
+            const gapIndicator = card.querySelector('.gap-indicator');
+            gapIndicator.className = `gap-indicator ${getGapClass(gap)}`;
+            gapIndicator.textContent = getGapText(gap);
+        }
+
+        window.updateNotes = function(controlId, value) {
+            if (!assessmentData[controlId]) assessmentData[controlId] = {};
+            assessmentData[controlId].notes = value;
+            saveAssessmentData();
+        }
+
+        window.toggleMaturity = function(controlId) {
+            const safeControlId = controlId.replace(/\./g, '-');
+            const maturityDiv = document.getElementById(`maturity-${safeControlId}`);
+            maturityDiv.classList.toggle('show');
+            const button = maturityDiv.previousElementSibling;
+            button.textContent = maturityDiv.classList.contains('show') ? 'Hide Maturity Levels' : 'Show Maturity Levels';
+        }
+
+        function setupAIListeners() {
+            document.querySelectorAll('.ai-button[data-control-id]').forEach(btn => {
+                const controlId = btn.getAttribute('data-control-id');
+                const controlTitle = btn.getAttribute('data-control-title');
+                
+                btn.addEventListener('click', () => {
+                    startAIAssessment(controlId, controlTitle);
+                });
+            });
+        }
+
+        function updateDashboard() {
+            const controlIds = Object.keys(nistControls);
+            const assessedControls = Object.keys(assessmentData).filter(id => 
+                (assessmentData[id].currentScore > 0) || (assessmentData[id].targetScore > 0)
+            );
+
+            let totalCurrent = 0, totalTarget = 0, assessedCount = 0;
+
+            assessedControls.forEach(id => {
+                const current = assessmentData[id].currentScore || 0;
+                const target = assessmentData[id].targetScore || 0;
+                if (current > 0 || target > 0) {
+                    totalCurrent += current;
+                    totalTarget += target;
+                    assessedCount++;
+                }
+            });
+
+            const avgCurrent = assessedCount > 0 ? (totalCurrent / assessedCount).toFixed(1) : '0.0';
+            const avgTarget = assessedCount > 0 ? (totalTarget / assessedCount).toFixed(1) : '0.0';
+            const avgGap = assessedCount > 0 ? ((totalTarget - totalCurrent) / assessedCount).toFixed(1) : '0.0';
+            const completion = controlIds.length > 0 ? Math.round((assessedCount / controlIds.length) * 100) : 0;
+
+            document.getElementById('currentScoreValue').textContent = avgCurrent;
+            document.getElementById('targetScoreValue').textContent = avgTarget;
+            document.getElementById('gapValue').textContent = avgGap;
+            document.getElementById('completionValue').textContent = completion + '%';
+        }
+
+        window.exportToJSON = function() {
+            const exportData = {
+                exportDate: new Date().toISOString(),
+                framework: 'NIST CSF 2.0',
+                assessmentData: assessmentData,
+                controls: nistControls
+            };
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `NIST_CSF_Assessment_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        window.exportToCSV = function() {
+            // Create complete export that can be re-imported
+            let csv = 'Control_ID,Control_Title,Control_Description,Category,Subcategory,Level_1_Maturity,Level_2_Maturity,Level_3_Maturity,Level_4_Maturity';
+            
+            // Check if any control has Level 5
+            const hasLevel5 = Object.values(nistControls).some(control => control.maturityLevels[5]);
+            if (hasLevel5) {
+                csv += ',Level_5_Maturity';
+            }
+            
+            // Add assessment columns
+            csv += ',Current_Score,Target_Score,Gap,Assessment_Notes\n';
+            
+            Object.entries(nistControls).forEach(([controlId, control]) => {
+                const assessment = assessmentData[controlId] || {};
+                const currentScore = assessment.currentScore || 0;
+                const targetScore = assessment.targetScore || 0;
+                const gap = targetScore - currentScore;
+                const notes = assessment.notes || '';
+                const escapeCSV = (str) => `"${String(str).replace(/"/g, '""')}"`;
+                
+                // Build row with all original data plus assessment data
+                let row = [
+                    escapeCSV(controlId),
+                    escapeCSV(control.title),
+                    escapeCSV(control.description),
+                    escapeCSV(control.category),
+                    escapeCSV(control.subcategory),
+                    escapeCSV(control.maturityLevels[1] || ''),
+                    escapeCSV(control.maturityLevels[2] || ''),
+                    escapeCSV(control.maturityLevels[3] || ''),
+                    escapeCSV(control.maturityLevels[4] || '')
+                ];
+                
+                if (hasLevel5) {
+                    row.push(escapeCSV(control.maturityLevels[5] || ''));
+                }
+                
+                // Add assessment data
+                row.push(currentScore, targetScore, gap, escapeCSV(notes));
+                
+                csv += row.join(',') + '\n';
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `NIST_CSF_Complete_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        window.clearAllData = function() {
+            if (confirm('Are you sure you want to clear all assessment data? This cannot be undone.')) {
+                assessmentData = {};
+                localStorage.removeItem('nistAssessmentData');
+                renderControls();
+                updateDashboard();
+                alert('All assessment data cleared.');
+            }
+        }
+
+        window.resetDatabase = function() {
+            if (confirm('Are you sure you want to reset the entire database?\n\nThis will:\n• Clear all loaded controls\n• Clear all assessment data\n• Show the CSV upload section\n\nThis cannot be undone.')) {
+                // Clear all data
+                nistControls = {};
+                assessmentData = {};
+                localStorage.removeItem('nistControlsData');
+                localStorage.removeItem('nistAssessmentData');
+                
+                // Show upload section and clear controls grid
+                document.getElementById('uploadSection').style.display = 'block';
+                document.getElementById('controlsGrid').innerHTML = '<div class="loading">Please upload the NIST CSF CSV file to load controls...</div>';
+                
+                // Reset dashboard
+                updateDashboard();
+                
+                alert('✅ Database reset complete! You can now upload a new CSV file.');
+            }
+        }
+
+        function setupEventListeners() {
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
+                renderControls(activeFilter, e.target.value);
+            });
+
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    const searchTerm = document.getElementById('searchInput').value;
+                    renderControls(e.target.dataset.filter, searchTerm);
+                });
+            });
+
+            document.getElementById('test-api-btn').addEventListener('click', testApiConnection);
+            document.getElementById('reset-api-btn').addEventListener('click', resetApiKey);
+        }
+
+        function initializeApp() {
+            console.log('Initializing NIST CSF Tracker...');
+            loadAssessmentData();
+            
+            const storedControls = localStorage.getItem('nistControlsData');
+            if (storedControls) {
+                try {
+                    nistControls = JSON.parse(storedControls);
+                    if (Object.keys(nistControls).length > 0) {
+                        document.getElementById('uploadSection').style.display = 'none';
+                        renderControls();
+                        updateDashboard();
+                    }
+                } catch (e) {
+                    console.error('Error loading stored controls:', e);
+                }
+            }
+            
+            setupEventListeners();
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeApp);
+        } else {
+            initializeApp();
+        }
+    </script>
+</body>
+</html>
