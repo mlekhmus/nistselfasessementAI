@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  nist-csf-tracker:
+    build: .
+    ports:
+      - "8000:8000"   # Web interface
+      - "8001:8001"   # Claude API proxy
+    environment:
+      - CLAUDE_API_KEY=${CLAUDE_API_KEY:-}
+    volumes:
+      # Optional: Mount a local directory to persist assessment data
+      - nist_data:/app/data
+    restart: unless-stopped
+    container_name: nist-csf-tracker
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  nist_data:

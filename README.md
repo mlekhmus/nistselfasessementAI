@@ -1,172 +1,177 @@
-NIST CSF 2.0 Manufacturing Compliance Tracker
-A web-based cybersecurity maturity assessment tool with AI-powered guidance. Evaluate your organization against NIST CSF 2.0 controls with intelligent questionnaires and automated gap analysis.
+# NIST CSF Self-Assessment AI
 
-🎯 What Makes This Different
-Detailed Maturity Level Guidance: Each control includes specific, actionable descriptions for all 5 maturity levels (Initial → Optimized), not just generic scoring.
+AI-powered cybersecurity maturity assessment tool for NIST CSF 2.0 with manufacturing-specific controls and intelligent guidance.
 
-AI Assessor with Context: The AI doesn't just ask generic questions - it references your specific control definitions and maturity level guidance to provide targeted, relevant assessments.
+## 🚀 **One-Command Installation**
 
-This is what separates our NIST self-assessor from the rest.
+```bash
+curl -sSL https://raw.githubusercontent.com/mlekhmus/nistselfasessementAI/main/install.sh | bash
+```
 
-<img width="1638" alt="image" src="https://github.com/user-attachments/assets/c5b9eef7-ff8c-4a1f-a6cd-00529164ef71" />
+**That's it!** The installer will:
+- ✅ Download all files from GitHub
+- ✅ Set up Docker environment  
+- ✅ Build and start the application
+- ✅ Open at `http://localhost:8000/nist_csf_tracker_complete.html`
 
-<img width="1393" alt="image" src="https://github.com/user-attachments/assets/be366754-a194-4d65-8324-8ce4beae1543" />
+## 🎯 Alternative Installation Methods
 
+### Method 1: Git Clone
+```bash
+git clone https://github.com/mlekhmus/nistselfasessementAI.git
+cd nistselfasessementAI
+docker-compose up --build -d
+```
 
-🚀 Quick Start
-1. Setup Web Server
-The app needs to run on a web server (not just opened as a file) for full functionality.
+### Method 2: Download and Extract
+```bash
+wget https://github.com/mlekhmus/nistselfasessementAI/archive/main.zip
+unzip main.zip && cd nistselfasessementAI-main
+docker-compose up --build -d
+```
 
-Option A: Python Server (Recommended)
-
-bash
-# Navigate to app directory
-cd nist-csf-tracker
+### Method 3: Manual Setup (if Docker not preferred)
+```bash
+git clone https://github.com/mlekhmus/nistselfasessementAI.git
+cd nistselfasessementAI
 
 # Start web server
-python -m http.server 8000
+python -m http.server 8000 &
 
-# Open browser to: http://localhost:8000
-Option B: Node.js Server
+# Start API proxy  
+python claude_proxy.py &
 
-bash
-# Install and use serve
-npm install -g serve
-serve -s . -l 8000
-Option C: Any other web server
+# Open browser
+open http://localhost:8000/nist_csf_tracker_complete.html
+```
 
-Use Apache, Nginx, or your preferred server
-Serve the HTML file from any port
-2. Start AI Proxy (Optional but Recommended)
-For AI-powered assessments, run the proxy in a separate terminal:
+## 🤖 AI Features Setup
 
-bash
-# Start the Claude API proxy
-python claude_proxy.py
-You'll see:
+1. **Get Claude API Key**: Visit [console.anthropic.com](https://console.anthropic.com/)
+2. **Set Environment Variable**:
+   ```bash
+   echo "CLAUDE_API_KEY=your_key_here" > .env
+   docker-compose restart
+   ```
+3. **Or Enter in Web Interface**: Click "🔍 Test API Connection" in the app
 
-🚀 Claude API Proxy running on http://localhost:8001
-📡 Use http://localhost:8001/claude as your API endpoint
-3. Open the Application
-Navigate to: http://localhost:8000/nist_csf_tracker_complete.html
-Upload CSV: Load the provided nist-csf-manufacturing-csv.txt file
-Setup AI (if using proxy):
-Click "🔍 Test API Connection"
-Enter your Claude API key when prompted
-Click test to verify connection
-🎯 How to Use
-Load Your Controls
-Upload CSV: Use the file upload section to load NIST controls
-Auto-populate: 89+ manufacturing controls load automatically
-Dashboard Updates: See real-time metrics as you assess
-Assess Controls
-Manual Assessment:
+## ✨ What You Get
 
-Set Current Score (1-5 maturity level)
-Set Target Score (desired maturity level)
-Add Notes for documentation
-AI-Powered Assessment:
+### AI-Powered Assessment Features
+- **Control-Specific Guidance**: AI references exact control definitions and maturity levels
+- **Intelligent Questioning**: Targeted questions based on your uploaded control descriptions  
+- **Maturity Mapping**: Automatically maps responses to specific maturity levels (1-5)
+- **Actionable Recommendations**: Specific steps to reach the next maturity level
 
-Click 🤖 AI Assessment on any control
-Interactive Chat: Answer AI questions about your implementation
-Get Results: Receive maturity score and improvement recommendations
-Save to Notes: Add AI assessment to your documentation
-Track Progress
-Dashboard: View completion %, average scores, and gaps
-Filter/Search: Find specific controls quickly
-Export Data: Save as JSON or CSV for reporting
-Data Management
-Auto-Save: All data saved to browser automatically
-Export Complete: CSV export includes all original data + your assessments
-Re-Import: Load exported CSVs to restore previous work
-📋 What You Get
-Files Included
-nist_csf_tracker_complete.html - Main application
-nist-csf-manufacturing-csv.txt - 89+ NIST controls with maturity guidance
-claude_proxy.py - AI proxy server for Claude API
-Key Features
-✅ 89+ Manufacturing Controls with detailed maturity level descriptions
-✅ Context-Aware AI Assessor that references your specific control definitions
-✅ Comprehensive Maturity Guidance - not just scores, but actionable level descriptions
-✅ Complete Export/Import Cycle - export includes all data, re-import restores everything
-✅ Real-time Gap Analysis and progress dashboard
-✅ Mobile Responsive design for assessments anywhere
-🤖 AI Assessment Features
-What separates this from other NIST assessors:
+### 89+ Manufacturing Controls
+Each control includes detailed maturity guidance:
+- **Level 1 - Initial**: "Security decisions made without clear understanding..."
+- **Level 2 - Developing**: "Security teams somewhat aware of business objectives..."  
+- **Level 3 - Defined**: "Cybersecurity goals formally aligned with business objectives..."
+- **Level 4 - Managed**: "Security risk management embedded in enterprise governance..."
+- **Level 5 - Optimized**: "Real-time optimization and continuous improvement..."
 
-📋 Detailed Maturity Guidance
-Each control includes comprehensive descriptions for all maturity levels:
+### Complete Assessment Platform
+- ✅ **Real-time Dashboard** with gap analysis and completion tracking
+- ✅ **Export/Import** complete assessment data (CSV/JSON)
+- ✅ **Mobile Responsive** - assess anywhere on any device
+- ✅ **Local Storage** - no data leaves your environment
+- ✅ **Docker Containerized** - consistent deployment anywhere
 
-Level 1 - Initial: "Security decisions are made without clear understanding..."
-Level 2 - Developing: "Security teams are somewhat aware of business objectives..."
-Level 3 - Defined: "Cybersecurity goals are formally aligned with business objectives..."
-Level 4 - Managed: "Security risk management is embedded in enterprise governance..."
-🤖 Context-Aware AI Assessor
-The AI doesn't ask generic questions. Instead it:
+## 🎯 Quick Start Guide
 
-References Specific Controls: "I'll be evaluating control GV.OC-01 - Organizational Context..."
-Uses Your Maturity Definitions: Questions based on the exact Level 1-4 guidance you uploaded
-Provides Targeted Analysis: Maps your responses to specific maturity characteristics
-Gives Actionable Next Steps: "To reach Level 3, focus on documented frameworks..."
-Example AI Question: "Could you describe how your cybersecurity team currently learns about and incorporates organizational business objectives into security planning and decision-making?"
+1. **Run the installer** (one command above)
+2. **Open browser** to `http://localhost:8000/nist_csf_tracker_complete.html`
+3. **Upload CSV**: Load the included NIST controls file  
+4. **Add API Key**: Enter your Claude API key for AI features
+5. **Start Assessing**: Use manual scoring or AI-guided assessment
+6. **Export Results**: Save your complete assessment
 
-No API Key? Use Demo Mode to see how AI assessments work.
+## 🔧 Management Commands
 
-Detailed Maturity Level Descriptions
-Unlike generic NIST assessments, each control includes specific, actionable descriptions:
+```bash
+# View logs
+docker-compose logs -f
 
-Level 1 - Initial: "Security decisions are made without clear understanding of organizational goals. Cybersecurity is treated as a separate function from business strategy."
+# Stop services  
+docker-compose down
 
-Level 2 - Developing: "Security teams are somewhat aware of business objectives, but alignment is informal and driven by incident response needs."
+# Restart services
+docker-compose restart
 
-Level 3 - Defined: "Cybersecurity goals are formally aligned with business objectives through documented frameworks. Security initiatives are mapped to mission priorities."
+# Update to latest version
+git pull origin main
+docker-compose up --build -d
+```
 
-Level 4 - Managed: "Security risk management is embedded in enterprise governance. Strategy reviews incorporate cybersecurity input. Dashboards track alignment of controls with business KPIs."
-This level of detail enables the AI to ask precise, relevant questions and provide targeted improvement guidance.
+## 📊 What Makes This Different
 
-📊 CSV Format
-Your CSV should include these columns:
+**This isn't just another NIST assessment tool.** Most tools give you generic questions and basic scoring. This tool provides:
 
-Control_ID, Control_Title, Control_Description, Category, Subcategory,
-Level_1_Maturity, Level_2_Maturity, Level_3_Maturity, Level_4_Maturity, [Level_5_Maturity]
-The included sample file shows the exact format needed.
+### Detailed Maturity Guidance
+Every control includes specific, actionable descriptions for all maturity levels - not just generic scores.
 
-🛠️ Requirements
-Web Server (Python, Node.js, Apache, etc.)
-Modern Browser (Chrome, Firefox, Safari, Edge)
-Python 3.6+ (for AI proxy server)
-Claude API Key (optional, for AI features)
-🆘 Troubleshooting
-"File not found" errors:
+### Context-Aware AI  
+The AI doesn't ask generic questions. It references your specific control definitions to provide targeted assessments.
 
-Make sure you're using a web server, not opening the HTML file directly
-Check that all files are in the same directory
-AI not working:
+### Manufacturing Focus
+89+ controls specifically tailored for manufacturing environments with industry-relevant examples.
 
-Verify proxy server is running: python claude_proxy.py
-Test API connection in the app
-Try Demo Mode if no API key
-CSV upload fails:
+### Complete Data Lifecycle
+Export includes all control definitions AND your assessment data - re-import later to restore everything exactly as it was.
 
-Check your CSV follows the required column format
-Ensure no special characters in file path
-Data not saving:
+## 🆘 Troubleshooting
 
-Enable JavaScript and local storage in browser
-Don't use private/incognito mode
-📈 Example Workflow
-Start servers: python -m http.server 8000 and python claude_proxy.py
-Open app: Navigate to http://localhost:8000/nist_csf_tracker_complete.html
-Load controls: Upload the provided CSV file
-Setup AI: Enter Claude API key and test connection
-Begin assessment: Use AI or manual scoring for each control
-Track progress: Monitor dashboard for completion and gaps
-Export results: Save complete assessment as CSV or JSON
-🚀 Ready to Start?
-Clone this repo or download the files
-Start your web server on port 8000
-Run the proxy (if using AI): python claude_proxy.py
-Open the app in your browser
-Upload the CSV and start assessing!
-Get your Claude API key at console.anthropic.com for full AI features.
+**Container won't start:**
+```bash
+docker-compose logs
+```
 
+**Can't access localhost:8000:**
+```bash
+# Check if ports are in use
+netstat -an | grep 8000
+docker ps
+```
+
+**AI features not working:**
+```bash
+# Test proxy directly
+curl http://localhost:8001/claude
+
+# Check API key
+docker-compose exec nist-csf-tracker env | grep CLAUDE
+```
+
+## 📈 Use Cases
+
+- **Internal Security Assessments**: Evaluate organizational cybersecurity maturity
+- **Compliance Preparation**: Prepare for audits with documented evidence
+- **Gap Analysis**: Identify specific areas for security improvement  
+- **Progress Tracking**: Monitor improvement over time with regular assessments
+- **Training & Education**: Learn NIST CSF with interactive examples
+
+## 🤝 Contributing
+
+- **Report Issues**: [GitHub Issues](https://github.com/mlekhmus/nistselfasessementAI/issues)
+- **Suggest Features**: [GitHub Discussions](https://github.com/mlekhmus/nistselfasessementAI/discussions)
+- **Contribute Code**: Fork, develop, and submit pull requests
+
+## 📄 License
+
+[Add your license here]
+
+---
+
+## 🎉 Ready to Assess Your Cybersecurity Maturity?
+
+**One command to get started:**
+```bash
+curl -sSL https://raw.githubusercontent.com/mlekhmus/nistselfasessementAI/main/install.sh | bash
+```
+
+Then open `http://localhost:8000/nist_csf_tracker_complete.html` and begin your AI-powered NIST CSF assessment!
+
+---
+
+*Built for the cybersecurity community • Powered by AI • Based on NIST CSF 2.0*
